@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <conio.h>
 #include <string.h>
-#include <windows.h>
 
 typedef struct {
     char nombre[50];
@@ -50,48 +49,6 @@ int controlarPanel(){
    }
   }
 }
-
-int validarCedulaEcuatoriana(const char *cedula) {
-    if (cedula == NULL || strlen(cedula) == 0) {
-        printf("Error: La cédula ingresada es nula o está vacía.\n");
-        return 0;
-    }
-
-    if (strlen(cedula) != 10) {
-        printf("Error: La cédula debe tener exactamente 10 dígitos.\n");
-        return 0;
-    }
-    for (int i = 0; i < 10; i++) {
-        if (cedula[i] < '0' || cedula[i] > '9') {
-            printf("Error: La cédula debe contener exclusivamente números.\n");
-            return 0;
-        }
-    }
-
-    int provincia = (cedula[0] - '0') * 10 + (cedula[1] - '0');
-    if ((provincia < 1 || provincia > 24) && provincia != 30) {
-        printf("Error: Código de provincia inválido (Debe ser entre 01-24 o 30).\n");
-        return 0;
-    }
-
-    return 1;
-}
-
-int yaVoto(const char *cedula) {
-    FILE *archivo = fopen("C:\\Users\\carlo\\Desktop\\votaciones\\cedulas.txt", "r");
-    if (archivo == NULL) return 0; 
-
-    char cedulaGuardada[50];
-    while (fscanf(archivo, "%49s", cedulaGuardada) == 1) {
-        if (strcmp(cedulaGuardada, cedula) == 0) {
-            fclose(archivo);
-            return 1; 
-        }
-    }
-    fclose(archivo);
-    return 0;
-}
-
 int panelEstudiantes(int j, int cantidad)
 {
     int votacion;
@@ -173,13 +130,6 @@ int panelEstudiantes(int j, int cantidad)
     fprintf(fp, "Edad: %d\nCédula: %s\nVoto: %d\n", edad, cedula, votacion);
     printf("\nSu voto ha sido registrado.\n");
     fclose(fp);
-
-    FILE *fc = fopen("C:\\Users\\carlo\\Desktop\\votaciones\\cedulas.txt", "a");
-    if(fc != NULL){
-        fprintf(fc, "%s\n", cedula);
-        fclose(fc);
-    }
-
     return 0;
  }
 }
@@ -287,12 +237,19 @@ void resultadosFinales(int cantidad, int *cont, int *cont1, int *cont2, int *con
        res[j + 1] = actual;
     }
     
+    for (int i = 0; i < x; i++) {
+      printf("Candidato %d: %s -> %d votos\n", i + 1, res[i].nombre, res[i].votos);
+      *a=*a+res[i].votos;  
+    }
    *total=(float)res[0].votos/(*a+*blanco+*nulo);
-    
+    printf("Votos en blanco: %d\n", *blanco);
+    printf("Votos nulos: %d\n", *nulo);
+    printf("El ganador es %s con %d votos\n",res[0].nombre,res[0].votos);
+    printf("El margen de votos es de %.2f %%\n",*total*100);
 for(int i = 0; i < x; i++)
 {
     acta[i] = res[i];
-}
+ }
 }
 
 int contarCandidatos(){
@@ -327,7 +284,7 @@ void generarActa(){
   fprintf(archivo,"\v\t\t==============ACTA DE RESULTADOS================\n");
   printf("\v\t\t==============ACTA DE RESULTADOS================\n");
   for(int i=0;i<cantidad;i++) {
-     fprintf(archivo,"\nCandidato %d: %s, votos: %d",i+1,acta[i].nombre,acta[i].votos);
+     fprintf(archivo,"Candidato %d: %s, votos: %d\n",i+1,acta[i].nombre,acta[i].votos);
      printf("Candidato %d: %s, votos: %d\n",i+1,acta[i].nombre,acta[i].votos);
   }
   printf("Votos en blanco: %d\n",blanco);
@@ -354,141 +311,11 @@ int controlArchivos(){
   }else
   return 0;
 }
-
-int busquedaBinariaRecursiva(char arr[][50], int inicio, int fin, const char *objetivo) {
-    if (inicio > fin) {
-        return -1; 
-    }
-    
-    int medio = inicio + (fin - inicio) / 2;
-    int comparacion = strcmp(arr[medio], objetivo);
-    
-    if (comparacion == 0) {
-        return medio; 
-    }
-    
-    if (comparacion > 0) {
-        return busquedaBinariaRecursiva(arr, inicio, medio - 1, objetivo);
-    }
-    
-    return busquedaBinariaRecursiva(arr, medio + 1, fin, objetivo);
-}
-
-void administrarUsuarios() {
-    int opcion_admin;
-    
-    do {
-        printf("\t\t1.- Ver lista de usuarios que ya votaron\n");
-        printf("\t\t2.- Buscar y banear usuario\n");
-        printf("\t\t3.- Regresar al panel principal\n");
-        printf("Ingrese su opción: ");
-        scanf("%d", &opcion_admin);
-        while(getchar() != '\n');
-
-        if (opcion_admin == 1) {
-            FILE *archivo = fopen("C:\\Users\\carlo\\Desktop\\votaciones\\cedulas.txt", "r");
-            if (!archivo) {
-                printf("\nAviso: Aún no hay registros de usuarios que hayan votado.\n");
-            } else {
-                char cedulaGuardada[50];
-                int count = 0;
-                printf("\n--- Lista de Cédulas Registradas ---\n");
-                while (fscanf(archivo, "%49s", cedulaGuardada) == 1) {
-                    count++;
-                    printf("%d. %s\n", count, cedulaGuardada);
-                }
-                if (count == 0) {
-                    printf("La lista está vacía.\n");
-                }
-                fclose(archivo);
-            }
-        } 
-        else if (opcion_admin == 2) {
-            FILE *archivo = fopen("C:\\Users\\carlo\\Desktop\\votaciones\\cedulas.txt", "r");
-            if (!archivo) {
-                printf("\n Error: No hay registros de usuarios.\n");
-                continue;
-            }
-
-            char arregloCedulas[200][50];
-            int n = 0;
-            
-            while (fscanf(archivo, "%49s", arregloCedulas[n]) == 1) {
-                n++;
-            }
-            fclose(archivo);
-
-            if (n == 0) {
-                printf("\n -> La lista de votantes está vacía.\n");
-                continue;
-            }
-
-            char temporal[50];
-            for (int i = 0; i < n - 1; i++) {
-                for (int j = 0; j < n - i - 1; j++) {
-                    if (strcmp(arregloCedulas[j], arregloCedulas[j+1]) > 0) {
-                        strcpy(temporal, arregloCedulas[j]);
-                        strcpy(arregloCedulas[j], arregloCedulas[j+1]);
-                        strcpy(arregloCedulas[j+1], temporal);
-                    }
-                }
-            }
-
-            char cedulaEliminar[50];
-            printf("\nIngrese la cédula del usuario que desea desbanear: ");
-            scanf("%49s", cedulaEliminar);
-            while(getchar() != '\n');
-
-            int indice = busquedaBinariaRecursiva(arregloCedulas, 0, n - 1, cedulaEliminar);
-
-            if (indice != -1) {
-                for (int i = indice; i < n - 1; i++) {
-                    strcpy(arregloCedulas[i], arregloCedulas[i+1]);
-                }
-                n--;
-
-                archivo = fopen("C:\\Users\\carlo\\Desktop\\votaciones\\cedulas.txt", "w");
-                if (archivo) {
-                    for (int i = 0; i < n; i++) {
-                        fprintf(archivo, "%s\n", arregloCedulas[i]);
-                    }
-                    fclose(archivo);
-                }
-                printf("Éxito: El usuario con cédula %s fue eliminado de la lista negra y puede votar.\n", cedulaEliminar);
-            } else {
-                printf("Error: La cédula %s no se encontró en los registros de votación.\n", cedulaEliminar);
-            }
-        }
-        else if (opcion_admin != 3) {
-            printf("\nOpción no válida. Intente de nuevo.\n");
-        }
-
-    } while (opcion_admin != 3);
-}
-int contarVotosExistentes() {
-    char ruta[200];
-    int i = 0;
-    FILE *archivo;
-    
-    // Bucle infinito que busca archivos hasta que encuentra uno que no existe
-    while (1) {
-        snprintf(ruta, sizeof(ruta), "C:\\Users\\carlo\\Desktop\\votaciones\\datos%d.txt", i);
-        archivo = fopen(ruta, "r");
-        
-        if (archivo == NULL) {
-            // Si el archivo no existe, significa que este es el número de voto que sigue
-            return i; 
-        }
-        fclose(archivo);
-        i++;
-    }
-}
-
 int panelAdministrador(char admin[],char pasar[]){
   char nombre[]="Administrador1";
   char contr[]="123456";
   int op,comp=0;
-  int cont = 0, cont1 = 0, cont2 = 0, cont3 = 0, cont4 = 0, a=0;
+  int cont = 0, cont1 = 0, cont2 = 0, cont3 = 0, cont4 = 0, a=0,var=0;
   float total=0;
   Resultado acta[5];
     int blanco = 0, nulo = 0,dif=contarCandidatos();
@@ -518,7 +345,16 @@ int panelAdministrador(char admin[],char pasar[]){
       generarActa(dif);
       return 0;
     case 3:
-      printf("Hola\n");
+     printf("¿Desea realizar auditoria del archivo de los candidatos(1)o los votos(2)?");
+    printf("\nIngrese 1 o 2: ");
+    scanf("%d",&var);
+    if(var==1){
+      verificarIntegridad();
+    }else if(var==2){
+      //verificarVotos();
+    }else{
+      printf("Opcion invalida");
+    }
       return 0;
     case 4:
       administrarUsuarios();
@@ -547,9 +383,7 @@ int panelAdministrador(char admin[],char pasar[]){
   return 0;
  } 
 }
-
-  int main(void){
-  SetConsoleOutputCP(65001);
+int main(void){
    char pasar[20];
    char admin[20];
    char c;
@@ -608,8 +442,3 @@ int panelAdministrador(char admin[],char pasar[]){
   }
    return 0; 
 }
-<<<<<<< HEAD
-=======
-
-//fin.
->>>>>>> Funciones/Charly

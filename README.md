@@ -195,7 +195,8 @@ main()
 ## Autor
 
 Carlos Luis Peñaloza Orellana / 
-Daniel Alejandro Urbina Arteaga / Erick Alexander Aguayo Almagro
+Daniel Alejandro Urbina Arteaga /
+ Erick Alexander Aguayo Almagro
 
       
 Proyecto académico desarrollado para simular un sistema básico de gestión electoral utilizando estructuras, archivos y algoritmos fundamentales en lenguaje C.
